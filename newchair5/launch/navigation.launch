@@ -1,0 +1,53 @@
+<launch>
+    
+  <!-- Arguments -->
+  <arg
+    name="model" />
+ <param name="robot_description" command="$(find xacro)/xacro '$(find wheelchair_description)/urdf/wheelchair.urdf.xacro'" />
+
+   <arg name="gui" default="False" />
+   <param name="use_gui" value="$(arg gui)"/>
+  <node
+    name="joint_state_publisher"
+    pkg="joint_state_publisher"
+    type="joint_state_publisher" />
+
+   <node name="robot_state_publisher" 
+   pkg="robot_state_publisher" 
+   type="robot_state_publisher" />
+  <!-- rviz -->
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find newchair5)/rviz/navigation.rviz"/>
+
+  <arg name="odom_frame_id"   default="odom"/>
+  <arg name="base_frame_id"   default="base_footprint"/>
+  <arg name="global_frame_id" default="map"/>
+  <arg name="odom_topic" default="odom" />
+  <arg name="laser_topic" default="/scan" />
+
+  <!--getting odometry from hector_slam -->
+  <!--Change to Hector.launch for simultaneous mapping and navigation -->
+  <include file="$(find newchair5)/launch/Hector_odom.launch" > </include> 
+  <!--tf  base_link  odom -->
+   <arg name="map_file" default="$(find newchair5)/map.yaml"/>
+
+
+  <arg name="open_rviz" default="true"/>
+  <arg name="move_forward_only" default="false"/>
+
+    <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+
+  <!-- AMCL -->
+  <include file="$(find newchair5)/launch/amcl.launch"/>
+  <!-- move_base -->
+  <include file="$(find newchair5)/launch/move_base.launch">
+    <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+  </include>
+
+
+</launch>

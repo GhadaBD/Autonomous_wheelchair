@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
+      <plugin filename="libgazebo_ros_joint_state_publisher.so" name="joint_state_publisher">
+        <jointName>base_left_caster_hub_joint, base_right_caster_hub_joint, base_left_front_wheel_joint, base_right_front_wheel_joint, left_caster_hub_left_caster_wheel_joint, right_caster_hub_right_caster_wheel_joint</jointName>
+        <updateRate>50.0</updateRate>
+        <alwaysOn>true</alwaysOn>
+      </plugin>
+  </gazebo>
+
+  <xacro:macro name="front_wheel_gazebo" params="suffix" >
+
+    <gazebo reference="${suffix}_front_wheel_link" >
+      <mu1 value="100.0" />
+      <mu2 value="100.0" />
+      <kp value="1000.0" />
+      <kd value="1000.0" />
+      <!-- <material value="" /> -->
+    </gazebo>
+
+  </xacro:macro>
+
+  <xacro:macro name="caster_wheel_gazebo" params="suffix" >
+
+    <gazebo reference="${suffix}_caster_wheel_link" >
+      <mu1 value="100.0" />
+      <mu2 value="100.0" />
+      <kp value="1000.0" />
+      <kd value="1000.0" />
+      <!-- <material value="" /> -->
+    </gazebo>
+
+  </xacro:macro>
+
+  <xacro:macro name="caster_hub_gazebo" params="suffix" >
+
+    <gazebo reference="${suffix}_caster_hub_link" >
+      <!-- <mu1 value="100.0" />
+      <mu2 value="100.0" />
+      <kp value="1000.0" />
+      <kd value="1000.0" /> -->
+      <!-- <material value="" /> -->
+    </gazebo>
+
+  </xacro:macro>
+
+  <xacro:macro name="wheelchair_base_gazebo" params="diameter separation">
+
+    <gazebo reference="base_link" >
+      <!-- <mu1 value="" />
+      <mu2 value="" />
+      <kp value="" />
+      <kd value="" />
+      <material value="" /> -->
+    </gazebo>
+
+    <!-- Controllers -->
+
+
+  </xacro:macro>
+
+</robot>

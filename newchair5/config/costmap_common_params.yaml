@@ -1,0 +1,28 @@
+#footprint: [ [-0.28,-0.5], [0.28,-0.5], [0.28,0.23], [-0.28,0.23] ]
+footprint: [ [-0.15,-0.3], [0.1,-0.3], [0.15,0.1], [-0.15,0.1] ] #
+#robot_radius: 0.2
+map_type: costmap
+transform_tolerance: 0.5
+obstacle_range: 2.0 #
+raytrace_range: 3.5
+inflation_layer: 
+  cost_scaling_factor: 2.0 #
+  enabled: true
+  inflation_radius: 0.55 #
+
+obstacle_layer: 
+  enabled: true
+  inf_is_valid: false
+  observation_persistence: 0.0
+  observation_sources: scan
+  scan: 
+    data_type: LaserScan
+    marking: true
+    sensor_frame: laser_joint
+    topic: scan
+    clearing: true
+static_layer: 
+  first_map_only: true
+
+
+

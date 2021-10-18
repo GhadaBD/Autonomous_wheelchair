@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find newchair5)/urdf/wheelchair.gazebo.xacro" />
+  <xacro:include filename="$(find newchair5)/urdf/wheelchair.transmission.xacro" />
+  <xacro:include filename="$(find newchair5)/urdf/wheelchair.constants.xacro" />
+  <xacro:include filename="$(find newchair5)/urdf/wheelchair.kinect.xacro" />
+  <xacro:include filename="$(find newchair5)/urdf/wheelchair.hokuyo.xacro" />
+
+  <property name="PI" value="3.1415926535897931" />
+
+  <property name="front_wheel_radius" value="0.17" />
+  <property name="front_wheel_base_y" value="0.27" />
+  <property name="caster_wheel_radius" value="0.1" />
+  <property name="caster_wheel_hub_y" value="0.0" />
+  <property name="caster_wheel_hub_x" value="-0.06" />
+  <property name="caster_hub_base_x" value="-0.58" />
+  <property name="caster_hub_base_y" value="0.19" />
+  <property name="caster_hub_base_z" value="-0.07" />
+  <property name="kinectx" value="-0.72" />
+  <property name="kinecty" value="0.0" />
+  <property name="kinectz" value="1.41" />
+
+  <wheelchair_kinect_single parent="base_link" roll="0.025" pitch="0.25" yaw="0.0" x="${kinectx}" y="${kinecty}" z="${kinectz}" />
+
+  <wheelchair_hokuyo parent="base_link" roll="${PI}" pitch="0.0" yaw=" 0.0" x="0.25" y="0.0" z="-0.1" />
+
+
+  <!-- Macro for front wheel only -->
+  <xacro:macro name="front_wheel" params="suffix parent reflect" >
+
+    <joint name="${parent}_${suffix}_front_wheel_joint" type="continuous">
+      <axis xyz="0 1 0" />
+      <limit effort="100" velocity="100" />
+      <dynamics damping="0.0" friction="0.05" />
+      <origin xyz="0 ${reflect*front_wheel_base_y} 0" rpy="0 0 0" />
+      <parent link="${parent}_link" />
+      <child link="${suffix}_front_wheel_link" />
+    </joint>
+
+    <link name="${suffix}_front_wheel_link" >
+      <xacro:front_wheel_inertia />
+      <visual>
+        <!-- <origin xyz="0 0 0" rpy="${PI/2} 0 0" /> -->
+        <geometry>
+
+          <!-- <cylinder length="0.07" radius="${front_wheel_radius}" /> -->
+          <mesh filename="package://newchair5/meshes/front_wheel.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+        <geometry>
+          <cylinder length="0.07" radius="${front_wheel_radius}" />
+          <!-- <mesh filename="package://wheelchair_description/meshes/front_wheel.dae" /> -->
+        </geometry>
+      </collision>
+    </link>
+
+    <xacro:front_wheel_gazebo suffix="${suffix}" />
+    <xacro:front_wheel_transmission parent="${parent}" suffix="${suffix}" reflect="${reflect}" />
+
+  </xacro:macro>
+
+
+  <!-- Macro for caster wheel only -->
+  <xacro:macro name="caster_wheel" params="suffix parent reflect" >
+
+    <joint name="${parent}_${suffix}_caster_wheel_joint" type="continuous" >
+      <axis xyz="0 1 0" />
+
+      <!-- <limit effort="1000" velocity="1000" /> -->
+      <dynamics damping="0.0" friction="0.02" />
+      <origin xyz="${reflect*caster_wheel_hub_x} 0 0" rpy="0 0 0" />
+      <parent link="${parent}_link" />
+      <child link="${suffix}_caster_wheel_link" />
+    </joint>
+
+    <link name="${suffix}_caster_wheel_link" >
+      <xacro:caster_wheel_inertia />
+      <visual>
+        <!-- <origin xyz="0 0 0" rpy="${PI/2} 0 0" /> -->
+        <geometry>
+          <!-- <cylinder length="0.038" radius="${caster_wheel_radius}" /> -->
+          <mesh filename="package://newchair5/meshes/caster_wheel.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+        <geometry>
+          <cylinder length="0.038" radius="${caster_wheel_radius}" />
+          <!-- <mesh filename="package://wheelchair_description/meshes/caster_wheel.dae" /> -->
+         </geometry>
+      </collision>
+    </link>
+
+    <xacro:caster_wheel_gazebo suffix="${suffix}" />
+
+  </xacro:macro>
+
+
+  <!-- Macro for caster hub only -->
+  <xacro:macro name="caster_hub" params="suffix parent *origin reflect" >
+
+    <joint name="${parent}_${suffix}_caster_hub_joint" type="continuous" >
+      <axis xyz="0 0 1" />
+      <!-- <limit lower="${PI}" upper="${-1*PI}" effort="0.0" velocity="0.0" /> -->
+      <dynamics damping="0.0" friction="0.0" />
+      <insert_block name="origin" />
+      <parent link="${parent}_link"/>
+      <child link="${suffix}_caster_hub_link" />
+    </joint>
+
+    <link name="${suffix}_caster_hub_link" value="${suffix}" >
+
+        <xacro:caster_hub_inertia lr="${reflect}"/>
+
+      <visual>
+        <geometry>
+          <mesh filename="package://newchair5/meshes/caster_hub_${suffix}.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://newchair5/meshes/caster_hub_${suffix}.dae" />
+        </geometry>
+      </collision>
+    </link>
+
+    <xacro:caster_hub_gazebo suffix="${suffix}" />
+    <!-- <xacro:caster_hub_transmission parent="${parent}" suffix="${suffix}" /> -->
+
+  </xacro:macro>
+
+
+  <!-- Macro for caster set (caster wheel & hub) -->
+  <xacro:macro name="caster_set" params="suffix parent *origin reflect" >
+
+    <xacro:caster_hub suffix="${suffix}" parent="${parent}" reflect="${reflect}">
+      <insert_block name="origin" />
+    </xacro:caster_hub>
+
+    <xacro:caster_wheel suffix="${suffix}" parent="${suffix}_caster_hub" reflect="${reflect}" />
+
+  </xacro:macro>
+
+
+  <!-- Macro for wheelchair_base (includes front & caster wheels and wheelchair body) -->
+  <xacro:macro name="wheelchair_base" >
+
+    <link name="base_footprint" >
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.01 0.01 0.01" />
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="base_footprint_joint" type="fixed" >
+      <origin xyz="0 0 ${front_wheel_radius}" rpy="0 0 0" />
+      <child link="base_link" />
+      <parent link="base_footprint" />
+    </joint>
+
+    <link name="base_link" >
+      <xacro:wheelchair_base_inertia />
+      <visual>
+        <geometry>
+          <mesh filename="package://newchair5/meshes/wheelchair_base_seat.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://newchair5/meshes/wheelchair_base_seat.dae" />
+        </geometry>
+      </collision>
+    </link>
+
+    <xacro:front_wheel suffix="left" parent="base" reflect="1" />
+    <xacro:front_wheel suffix="right" parent="base" reflect="-1" />
+
+    <xacro:caster_set suffix="left" parent="base" reflect="1" >
+      <origin xyz="${caster_hub_base_x} ${caster_hub_base_y} ${caster_hub_base_z}"
+              rpy="0 0 0" />
+    </xacro:caster_set>
+    <xacro:caster_set suffix="right" parent="base" reflect="-1" >
+      <origin xyz="${caster_hub_base_x} ${-caster_hub_base_y} ${caster_hub_base_z}"
+              rpy="0 0 ${PI}" />
+    </xacro:caster_set>
+
+
+    <xacro:wheelchair_base_gazebo diameter="${2*front_wheel_radius}" separation="${2*front_wheel_base_y}" />
+
+  </xacro:macro>
+
+
+
+
+<!-- =============================================================================== -->
+
+
+  <!-- Original Testing Macro for front wheels only -->
+  <!-- <xacro:macro name="f_wheel" >
+
+    <joint name="wheel_joint" type="continuous">
+      <axis xyz="0 1 0" />
+      <limit effort="100" velocity="100" />
+      <dynamics damping="0.0" friction="0.05" />
+      <origin xyz="0 0 0" rpy="${M_PI} 0 0" />
+      <parent link="wheelchair_base_link" />
+      <child link="base_f_wheel_link" />
+    </joint>
+
+    <link name="base_f_wheel_link" >
+
+      <visual>
+
+        <geometry>
+          <mesh filename="package://nuric_wheelchair_model_02/meshes/wheel.dae" />
+        </geometry>
+      </visual>
+
+    </link>
+
+  </xacro:macro> -->
+
+
+  <!-- Original Testing Macro for wheelchair_base (includes front & caster wheels and wheelchair body) -->
+  <!-- <xacro:macro name="wheelchair_base" >
+
+    <link name="base_footprint" >
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.01 0.01 0.01" />
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="base_footprint_joint" type="fixed" >
+      <origin xyz="0 0 ${f_wheel_radius}" rpy="0 0 0" />
+      <child link="wheelchair_base_link" />
+      <parent link="base_footprint" />
+    </joint>
+
+    <link name="wheelchair_base_link" >
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.4 0.3 0.05" />
+        </geometry>
+      </visual>
+    </link>
+
+
+
+    <xacro:f_wheel >
+    </xacro:f_wheel>
+
+  </xacro:macro> -->
+
+<!-- =============================================================================== -->
+
+
+
+
+</robot>

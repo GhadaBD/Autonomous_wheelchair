@@ -1,0 +1,9 @@
+--- 
+scan_filter_chain: 
+  - 
+    name: range
+    params: 
+      lower_threshold: 0.3
+      upper_threshold: 16.0
+      use_message_range_limits: true
+    type: laser_filters/LaserScanRangeFilter

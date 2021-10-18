@@ -1,0 +1,26 @@
+<launch>
+  <arg
+    name="model" />
+ <param name="robot_description" command="$(find xacro)/xacro '$(find wheelchair_description)/urdf/wheelchair.urdf.xacro'" />
+ <node
+    name="tf_footprint_odom"
+    pkg="tf"
+    type="static_transform_publisher"
+    args="0 0 0 0 0 0 base_footprint odom 40" />
+
+
+  <node
+    name="joint_state_publisher_gui"
+    pkg="joint_state_publisher_gui"
+    type="joint_state_publisher_gui" />
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find wheelchair_description)/config/wheelchair_urdf.rviz" />
+
+</launch>

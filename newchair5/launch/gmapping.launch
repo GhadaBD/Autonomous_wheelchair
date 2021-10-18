@@ -1,0 +1,9 @@
+<launch> 
+
+
+<!-- Gmapping -->
+  <node pkg="gmapping" type="slam_gmapping" name="newchair5_slam_gmapping" output="screen">
+    <rosparam command="load" file="$(find newchair5)/config/gmapping_parameters.yaml" />
+  </node>
+
+</launch>

@@ -1,0 +1,47 @@
+<launch>
+  <arg name="world" default="myhouse"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find newchair5)/world/$(arg world).world"/>
+  </include>
+
+<param name="robot_description" command="$(find xacro)/xacro '$(find wheelchair_description)/urdf/wheelchair.urdf.xacro'" />
+
+
+  <rosparam file="$(find newchair5)/config/joints.yaml"
+            ns="/newchair5_joint_state_controller"/>
+  <rosparam file="$(find newchair5)/config/diffdrive.yaml"
+            ns="/newchair5_diff_drive_controller"/>
+
+  <node
+
+    name="spawn_model"
+    pkg="gazebo_ros"
+    type="spawn_model"
+    args="-param robot_description
+                -unpause
+                -urdf
+                -model newchair5"
+    output="screen" />
+  <node
+    name="fake_joint_calibration"
+    pkg="rostopic"
+    type="rostopic"
+    args="pub /calibrated std_msgs/Bool true" />
+
+
+  <node name="newchair5_controller_spawner" pkg="controller_manager" type="spawner"
+    args="newchair5_joint_state_controller
+          newchair5_diff_drive_controller"/>
+
+
+   <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering" >
+   <param name="default_topic" value="/newchair5_diff_drive_controller/cmd_vel"/>
+   </node>
+
+
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+    <rosparam command="load" file="$(find newchair5)/config/Laser_filter.yaml"/>
+  <remap from="scan" to="/scan" /> 
+  </node>
+
+</launch>

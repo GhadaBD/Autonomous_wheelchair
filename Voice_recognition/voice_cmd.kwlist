@@ -1,0 +1,9 @@
+FORWARD /1e-5/
+LEFT /1e-5/
+RIGHT /1e-3/
+STOP /1e-10/
+MARK /1e-5/             
+KITCHEN /1e-5/      
+BATHROOM /1e-10/     
+LIVINGROOM /1e-5/
+FOLLOWME /1e-10/	

@@ -1,0 +1,4 @@
+type: joint_state_controller/JointStateController
+joints: "base_left_front_wheel_joint base_right_front_wheel_joint"
+publish_rate: 50
+
